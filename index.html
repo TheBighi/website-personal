@@ -1,296 +1,1086 @@
 <!doctype html>
+
 <html lang="en">
+
 <head>
+
 <meta charset="utf-8">
+
 <meta name="viewport" content="width=device-width,initial-scale=1">
+
 <title>Copland OS · Lain login</title>
+
 <style>
-  *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#020021}
-  body{color:#72dce0;font-family:Georgia,'Times New Roman',serif}
-  .screen{position:fixed;inset:0;background:#020021}
-  svg{display:block;width:100%;height:100%}
-  .crt{pointer-events:none;position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(0,0,22,.1) 0px,rgba(0,0,22,.1) 1px,transparent 1px,transparent 3px);opacity:.55}
-  .vignette{pointer-events:none;position:absolute;inset:0;box-shadow:inset 0 0 13vw 2vw rgba(0,0,25,.25)}
-  .music{font-family:monospace;color:#b5d9ef;padding:4px 12px 15px 0;line-height:1.45}
-  #status{font-size:29px;letter-spacing:3px;margin:0 0 10px}
-  #song-title{font-size:32px;line-height:1.3;overflow-wrap:anywhere;margin:0;letter-spacing:1px;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
-  #artist{font-size:23px;opacity:.72;margin:8px 0 0}
-  .sync-indicator{position:fixed;right:30px;bottom:27px;display:flex;align-items:center;gap:4px;height:18px;opacity:0;pointer-events:none;transition:opacity .25s}
-  body[data-ready="true"] .sync-indicator{opacity:.22}
-  .sync-indicator i{display:block;width:3px;height:5px;background:#9af3ef;border-radius:1px;transform-origin:center}
-  body[data-ready="true"] .sync-indicator.fetching{opacity:.9}
-  .sync-indicator.fetching i{animation:signal .6s ease-in-out infinite;box-shadow:0 0 8px #8ceaf4}
-  .sync-indicator i:nth-child(2){animation-delay:-.12s}.sync-indicator i:nth-child(3){animation-delay:-.24s}.sync-indicator i:nth-child(4){animation-delay:-.36s}.sync-indicator i:nth-child(5){animation-delay:-.48s}
-  @keyframes signal{0%,100%{transform:scaleY(.6)}50%{transform:scaleY(3)}}
-  @media(max-width:650px){.sync-indicator{right:22px;bottom:22px}}
-  @media(prefers-reduced-motion:reduce){.sync-indicator.fetching i{animation:none;height:10px}}
-</style>
-</head>
-<body data-ready="false">
-<main class="screen" aria-label="Animated Copland OS login inspired by Serial Experiments Lain">
-<svg id="scene" viewBox="0 0 1440 1000" preserveAspectRatio="xMidYMid meet" role="group" aria-labelledby="sceneTitle sceneDesc">
-<title id="sceneTitle">Copland OS Enterprise</title>
-<desc id="sceneDesc">A cyan emblem on deep blue. Login panels assemble, the user is authorized, and the interface settles into a pale blue desktop.</desc>
-<defs>
-  <radialGradient id="halo"><stop stop-color="#0a18b5" stop-opacity=".74"/><stop offset=".64" stop-color="#020467" stop-opacity=".4"/><stop offset="1" stop-color="#020021" stop-opacity="0"/></radialGradient>
-  <radialGradient id="disc" cx="42%" cy="36%" r="64%"><stop stop-color="#124bff" stop-opacity=".8"/><stop offset=".47" stop-color="#0818d8" stop-opacity=".86"/><stop offset=".76" stop-color="#03066d"/><stop offset="1" stop-color="#00000f"/></radialGradient>
-  <radialGradient id="orb" cx="36%" cy="30%"><stop stop-color="#26d5e9"/><stop offset=".48" stop-color="#008dce"/><stop offset=".78" stop-color="#042ab9"/><stop offset="1" stop-color="#000345"/></radialGradient>
-  <radialGradient id="core"><stop stop-color="#05badd"/><stop offset=".65" stop-color="#008bc6"/><stop offset="1" stop-color="#0443b3"/></radialGradient>
-  <linearGradient id="stroke" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#00b6d2"/><stop offset=".57" stop-color="#0798c2"/><stop offset="1" stop-color="#092872"/></linearGradient>
-  <filter id="bloom" x="-35%" y="-35%" width="170%" height="170%"><feGaussianBlur stdDeviation="5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-  <filter id="soft"><feGaussianBlur stdDeviation="1.4"/></filter>
-  <filter id="energyGlow" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="4"/></filter>
-  <filter id="textGlow" x="-15%" y="-30%" width="130%" height="160%"><feDropShadow dx="-2" dy="2" stdDeviation="1" flood-color="#000018" flood-opacity=".9"/><feDropShadow dx="0" dy="0" stdDeviation="1.5" flood-color="#20ceeb" flood-opacity=".38"/></filter>
-</defs>
-<rect id="background" width="1440" height="1000" fill="#020021"/>
-<ellipse id="backHalo" cx="740" cy="500" rx="700" ry="640" fill="url(#halo)"/>
-<g id="rail"><rect id="railBar" x="84" width="92" height="1000" fill="#075064" opacity=".55"/><path id="railLine" d="M170 0V1000" stroke="#30b9ce" stroke-width="2" opacity=".5"/></g>
-<g id="bootBrand" fill="#51c2cf" filter="url(#textGlow)">
-  <text transform="translate(167 847) rotate(-90)" font-size="78" letter-spacing="-2">Copland OS Enterprise</text>
-  <text transform="translate(237 826) rotate(-90)" font-size="43" font-style="italic">Product by Tachibana Lab.</text>
-  <path d="M235 850V1000" stroke="#1db1ca" stroke-width="2" opacity=".7"/>
-</g>
-<!-- The same vector emblem stays on screen throughout the sequence. -->
-<g id="emblem" transform="translate(735 480) scale(1.05)">
-  <circle r="265" fill="#126bb2" opacity=".12"/>
-  <g filter="url(#bloom)">
-    <path d="M-180-149Q-281-100-330 0Q-277 99-190 145 M180-149Q281-100 330 0Q277 99 190 145" fill="none" stroke="url(#stroke)" stroke-width="53" stroke-linecap="round" opacity=".72"/>
-    <path d="M-54 161 A180 180 0 1 1 54 161 L54 258Q54 338 147 302 M-54 161L-54 258Q-54 338-147 302" fill="none" stroke="url(#stroke)" stroke-width="52" stroke-linecap="round" stroke-linejoin="round"/>
-    <circle r="110" fill="none" stroke="#39bacb" stroke-width="31" opacity=".64"/>
-    <circle r="70" fill="url(#core)"/>
-    <circle cx="0" cy="-264" r="24" fill="#008ecb"/>
-    <circle cx="-291" cy="151" r="31" fill="url(#orb)"/><circle cx="291" cy="151" r="31" fill="url(#orb)"/>
-  </g>
-</g>
-<g id="panels" opacity="0">
-  <g id="loginDisc"><ellipse rx="437" ry="147" fill="url(#disc)"/><ellipse rx="415" ry="129" fill="#0929d4" opacity=".08"/></g>
-  <g id="kernelDisc"><ellipse rx="270" ry="51" fill="url(#disc)"/></g>
-  <g id="voiceDisc"><ellipse rx="375" ry="64" fill="url(#disc)"/></g>
-</g>
-<g id="guides" stroke="#26bdd2" stroke-width="2" fill="none" opacity="0">
-  <path id="loginRule" d="M0 300H844"/><path id="networkRule" d="M427 466V1000"/><path id="kernelRule" d="M1067 266V1000"/><path id="voiceRule" d="M555 775V1000"/>
-</g>
-<g id="loginLabels" fill="#4cc9d8" filter="url(#textGlow)" opacity="0">
-  <text x="282" y="305" font-size="55">Set Login User Name</text>
-  <text x="1051" y="317" font-size="55">kernel Use</text>
-  <text transform="translate(432 962) rotate(-90)" font-size="51">Bighi</text>
-  <text id="voiceLabel" x="533" y="850" font-size="55">Voice Wave</text>
-</g>
-<g id="energy" opacity="0" fill="#6de3f1"></g>
-<g id="waveGroup" opacity="0"><path id="wave" fill="none" stroke="#55d3ec" stroke-width="1.4" opacity=".72"/></g>
-<g id="authorize" fill="#42ced4" filter="url(#textGlow)" opacity="0">
-  <text x="755" y="523" text-anchor="middle" font-size="136">Authorize User</text>
-  <g id="welcome"><text x="718" y="641" font-size="55">Welcome!</text><path d="M715 648H1440" stroke="#30aabc" stroke-width="2"/></g>
-</g>
-<g id="desktop" opacity="0" fill="#97cce9">
-  <text transform="translate(112 807) rotate(-90)" font-family="monospace" font-size="32" letter-spacing="4">Copland OS Enterprises</text>
-  <g font-family="monospace" font-size="33" letter-spacing="4">
-    <text x="342" y="344">Mail</text><path d="M255 355H476" stroke="#82b9e3" opacity=".4"/>
-    <text x="290" y="417">Menu</text><path d="M0 428H406" stroke="#82b9e3" opacity=".4"/>
-    <text transform="translate(355 873) rotate(-90)">Bighi</text><path d="M378 536V1000" stroke="#82b9e3" opacity=".35"/>
-    <foreignObject x="507" y="781" width="780" height="208"><div xmlns="http://www.w3.org/1999/xhtml" class="music" aria-live="polite" aria-atomic="true"><p id="status">Searching...</p><p id="song-title"></p><p id="artist"></p></div></foreignObject><path d="M493 789V1000" stroke="#82b9e3" opacity=".35"/>
-  </g>
-  <text x="930" y="576" text-anchor="middle" font-size="36" font-style="italic">Copland OS Enterprise</text>
-  <text x="930" y="620" text-anchor="middle" font-size="26" font-style="italic">Product By Tachibana Lab</text>
-</g>
-</svg>
-<div class="crt"></div><div class="vignette"></div>
-</main>
-<div id="sync-indicator" class="sync-indicator" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
-<script>
-/* Standalone animation with synthesized sound and Last.fm polling.
-   Sound is enabled automatically; browsers that block autoplay unlock it on
-   the first click or key press. No sound controls or mail/menu handlers.
-   Last.fm docs: https://www.last.fm/api/show/user.getRecentTracks
-*/
-const API_KEY = '4d288c1c7310848430dd818561af10c7';
-const USER = 'TheBighi';
-const SEARCH_DELAY_MS = 2500;
-const REFRESH_MS = 5000;
-
-(() => {
-  'use strict';
-  const DURATION = 12;
-  const $ = id => document.getElementById(id);
-  const clamp = x => Math.max(0,Math.min(1,x));
-  const ease = x => { x=clamp(x); return x*x*(3-2*x); };
-  const ramp = (t,a,b) => ease((t-a)/(b-a));
-  const mix = (a,b,t) => a+(b-a)*t;
-  const opacity = (id,n) => $(id).setAttribute('opacity',n.toFixed(4));
-  const attr = (id,k,v) => $(id).setAttribute(k,v);
-  const points = [];
-  for(let i=0;i<44;i++){
-    const g=document.createElementNS('http://www.w3.org/2000/svg','g');
-    const tail=document.createElementNS(g.namespaceURI,'path');
-    tail.setAttribute('stroke','#5dd9e8');tail.setAttribute('stroke-width','2');tail.setAttribute('fill','none');
-    const dot=document.createElementNS(g.namespaceURI,'ellipse');
-    dot.setAttribute('rx',4+(i%4)*2);dot.setAttribute('ry',4+(i%4)*2);
-    dot.setAttribute('filter','url(#bloom)');
-    g.append(tail,dot);$('energy').append(g);points.push({g,tail,dot});
-  }
-  function render(seconds){
-    const t=seconds/DURATION*12;
-    const assemble=ramp(t,2.1,3.9), auth=ramp(t,5.75,6.85), finish=ramp(t,8.4,11.5);
-    const dissolve=1-ramp(t,8.4,9.8);
-    const rgb=[mix(2,49,finish),mix(0,78,finish),mix(33,149,finish)].map(Math.round);
-    const bg=`rgb(${rgb.join(',')})`;
-    attr('background','fill',bg);document.querySelector('.screen').style.background=bg;
-    opacity('backHalo',1-finish*.9);
-    attr('railBar','x',mix(84,66,finish));attr('railBar','width',mix(92,72,finish));
-    attr('railBar','fill',`rgb(${Math.round(mix(7,107,finish))},${Math.round(mix(80,194,finish))},${Math.round(mix(100,173,finish))})`);
-    opacity('railLine',.5*(1-finish));opacity('bootBrand',1-ramp(t,8.5,10));
-    const scale=mix(1.05,.43,finish), x=mix(735,930,finish), y=mix(480,410,finish);
-    attr('emblem','transform',`translate(${x} ${y}) scale(${scale})`);
-    opacity('emblem',mix(1,.78,assemble)*(1-finish)+finish*.95);
-    opacity('panels',assemble*dissolve);
-    attr('loginDisc','transform',`translate(${mix(505,755,auth)} ${mix(385,480,auth)}) rotate(${mix(-8,0,auth)}) scale(${mix(.06,1,assemble)*mix(1,1.31,auth)} ${mix(.06,1,assemble)})`);
-    attr('kernelDisc','transform',`translate(1090 ${mix(330,276,assemble)}) scale(${mix(.02,1,assemble)})`);
-    attr('voiceDisc','transform',`translate(994 ${mix(870,805,assemble)}) scale(${mix(.02,1,assemble)})`);
-    opacity('voiceDisc',1-auth);opacity('guides',assemble*dissolve*.7);
-    attr('loginRule','pathLength','1');attr('loginRule','stroke-dasharray','1');attr('loginRule','stroke-dashoffset',1-assemble);
-    opacity('loginRule',1-auth);opacity('voiceRule',1-auth);
-    opacity('loginLabels',ramp(t,2.9,4)*dissolve);
-    $('loginLabels').children[0].setAttribute('opacity',1-auth);
-    opacity('voiceLabel',1-auth);
-    opacity('authorize',auth*dissolve);
-    attr('authorize','transform',`translate(0 ${mix(22,0,auth)})`);
-    opacity('welcome',ramp(t,6.7,7.4));
-    opacity('energy',ramp(t,3.5,4.4)*(1-ramp(t,7.8,9.5))*.55);
-    points.forEach(({g,tail,dot},i)=>{
-      const a=i*2.399+t*.37;
-      const phase=(t*.22+i*.137)%1;
-      const radius=28+phase*(i<16?144:355);
-      const cx=i<16?1072:720,cy=i<16?224:476;
-      const px=cx+Math.cos(a)*radius,py=cy+Math.sin(a)*radius*.75;
-      attrNode(g,'opacity',Math.sin(phase*Math.PI)*.8);
-      attrNode(dot,'cx',px);attrNode(dot,'cy',py);
-      attrNode(dot,'transform',`rotate(${a*180/Math.PI+90} ${px} ${py})`);
-      attrNode(tail,'d',`M${px} ${py}l${-Math.cos(a)*28} ${-Math.sin(a)*21}`);
-    });
-    opacity('waveGroup',ramp(t,3.9,4.6)*(1-auth));
-    let path='';
-    for(let i=0;i<138;i++){
-      const amplitude=(10+32*Math.pow(Math.sin(i*.063+t*1.6),4))*(.35+.65*Math.sin(i/137*Math.PI));
-      const wx=688+i*4.05, wy=790+Math.sin(i*2.3+t*13)*amplitude;
-      path+=(i?'L':'M')+wx.toFixed(1)+' '+wy.toFixed(1);
+    * {
+      box-sizing: border-box;
     }
-    attr('wave','d',path);
-    opacity('desktop',ramp(t,9.6,11.6));
 
-    document.body.dataset.stage=t<2.1?'boot':t<5.75?'login':t<8.4?'authorize':'desktop';
-  }
-  function attrNode(el,k,v){el.setAttribute(k,v)}
-  let position=0,playing=false,last=0,frame=0,ready=false;
-  let searchTimer=0,indicatorTimer=0,requestController=null,searchVersion=0;
-  let hasTrack=false;
-  let soundContext=null,master=null,soundBuilt=false;
-  let lastSoundPhase=-1;
-
-  // Web Audio synthesizes a quiet electrical hum, filtered static, and boot tones.
-  function createSound(){
-    if(soundBuilt)return;
-    const Audio=window.AudioContext||window.webkitAudioContext;
-    if(!Audio)return;
-    soundContext=new Audio();master=soundContext.createGain();master.gain.value=.25;master.connect(soundContext.destination);
-    const hum=soundContext.createGain();hum.gain.value=.045;hum.connect(master);
-    [55,110,164.8].forEach((frequency,i)=>{const osc=soundContext.createOscillator();osc.type=i===1?'triangle':'sine';osc.frequency.value=frequency;osc.connect(hum);osc.start();});
-    const buffer=soundContext.createBuffer(1,soundContext.sampleRate*3,soundContext.sampleRate);
-    const data=buffer.getChannelData(0);for(let i=0;i<data.length;i++)data[i]=Math.random()*2-1;
-    const noise=soundContext.createBufferSource();noise.buffer=buffer;noise.loop=true;
-    const filter=soundContext.createBiquadFilter();filter.type='bandpass';filter.frequency.value=1100;filter.Q.value=.75;
-    const noiseGain=soundContext.createGain();noiseGain.gain.value=.023;noise.connect(filter);filter.connect(noiseGain);noiseGain.connect(master);noise.start();
-    const lfo=soundContext.createOscillator(),depth=soundContext.createGain();lfo.frequency.value=.17;depth.gain.value=550;lfo.connect(depth);depth.connect(filter.frequency);lfo.start();
-    soundBuilt=true;
-  }
-  function enableSound(){
-    try{createSound();if(soundContext&&soundContext.state!=='running')soundContext.resume().catch(()=>{});}catch{}
-  }
-  function tone(frequency=740,length=.17){
-    if(!soundContext||soundContext.state!=='running')return;
-    const now=soundContext.currentTime,osc=soundContext.createOscillator(),gain=soundContext.createGain();
-    osc.type='sine';osc.frequency.setValueAtTime(frequency,now);osc.frequency.exponentialRampToValueAtTime(frequency*.72,now+length);
-    gain.gain.setValueAtTime(0,now);gain.gain.linearRampToValueAtTime(.15,now+.015);gain.gain.exponentialRampToValueAtTime(.0001,now+length);
-    osc.connect(gain);gain.connect(master);osc.start(now);osc.stop(now+length+.02);osc.onended=()=>{osc.disconnect();gain.disconnect();};
-  }
-  function unlockSound(){if(soundContext?.state!=='running')enableSound();}
-  document.addEventListener('pointerdown',unlockSound);
-  document.addEventListener('keydown',unlockSound);
-
-  function musicText(status,song='',artist=''){
-    // Keep the existing text while refreshing and avoid repeated live announcements.
-    for(const [id,text] of [['status',status],['song-title',song],['artist',artist]]){
-      if($(id).textContent!==text)$(id).textContent=text;
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: #020021;
     }
-    $('song-title').title=song;
-  }
-  function resetMusic(){
-    clearTimeout(searchTimer);clearTimeout(indicatorTimer);
-    requestController?.abort();requestController=null;searchVersion++;hasTrack=false;
-    $('sync-indicator').classList.remove('fetching');
-    musicText('Searching...');
-  }
-  async function fetchMusic(version){
-    if(version!==searchVersion||!ready||requestController)return;
-    const started=performance.now();
-    const controller=new AbortController();requestController=controller;
-    clearTimeout(indicatorTimer);$('sync-indicator').classList.add('fetching');
-    const timeout=setTimeout(()=>controller.abort(),4500);
-    try{
-      const params=new URLSearchParams({method:'user.getrecenttracks',user:USER,api_key:API_KEY,format:'json',limit:'1'});
-      const res=await fetch('https://ws.audioscrobbler.com/2.0/?'+params,{signal:controller.signal,cache:'no-store'});
-      if(!res.ok)throw new Error('HTTP '+res.status);
-      const data=await res.json();if(data.error)throw new Error(data.message||'Last.fm error');
-      if(version!==searchVersion)return;
-      const tracks=data.recenttracks?.track;
-      const track=Array.isArray(tracks)?tracks[0]:tracks;
-      if(!track?.name){hasTrack=false;musicText('No recent tracks.');return;}
-      const artist=typeof track.artist==='string'?track.artist:track.artist?.['#text']||track.artist?.name||'';
-      hasTrack=true;
-      musicText(track['@attr']?.nowplaying==='true'?'Now Playing:':'Last Played:',track.name,artist);
-    }catch{
-      if(version!==searchVersion)return;
-      if(!hasTrack)musicText('Connection unavailable.','Reconnecting...');
-    }finally{
-      clearTimeout(timeout);
-      if(requestController===controller)requestController=null;
-      if(version===searchVersion&&ready){
-        const elapsed=performance.now()-started;
-        // Brief responses still get a visible pulse; long requests animate throughout.
-        indicatorTimer=setTimeout(()=>$('sync-indicator').classList.remove('fetching'),Math.max(0,700-elapsed));
-        searchTimer=setTimeout(()=>fetchMusic(version),Math.max(0,REFRESH_MS-elapsed));
+
+    body {
+      color: #72dce0;
+      font-family: Georgia, "Times New Roman", serif;
+    }
+
+    .screen {
+      position: fixed;
+      inset: 0;
+      background: #020021;
+    }
+
+    svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* CRT-style overlays */
+    .crt {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.55;
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 22, 0.1) 0,
+        rgba(0, 0, 22, 0.1) 1px,
+        transparent 1px,
+        transparent 3px
+      );
+    }
+
+    .vignette {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      box-shadow: inset 0 0 13vw 2vw rgba(0, 0, 25, 0.25);
+    }
+
+    /* Last.fm track display */
+    .music {
+      padding: 4px 12px 15px 0;
+      color: #b5d9ef;
+      font-family: monospace;
+      line-height: 1.45;
+    }
+
+    #status {
+      margin: 0 0 10px;
+      font-size: 29px;
+      letter-spacing: 3px;
+    }
+
+    #song-title {
+      display: -webkit-box;
+      margin: 0;
+      overflow: hidden;
+      overflow-wrap: anywhere;
+      font-size: 32px;
+      line-height: 1.3;
+      letter-spacing: 1px;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+    }
+
+    #artist {
+      margin: 8px 0 0;
+      font-size: 23px;
+      opacity: 0.72;
+    }
+
+    /* Small activity indicator shown while Last.fm is being refreshed */
+    .sync-indicator {
+      position: fixed;
+      right: 30px;
+      bottom: 27px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      height: 18px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+    }
+
+    body[data-ready="true"] .sync-indicator {
+      opacity: 0.22;
+    }
+
+    .sync-indicator i {
+      display: block;
+      width: 3px;
+      height: 5px;
+      background: #9af3ef;
+      border-radius: 1px;
+      transform-origin: center;
+    }
+
+    body[data-ready="true"] .sync-indicator.fetching {
+      opacity: 0.9;
+    }
+
+    .sync-indicator.fetching i {
+      animation: signal 0.6s ease-in-out infinite;
+      box-shadow: 0 0 8px #8ceaf4;
+    }
+
+    .sync-indicator i:nth-child(2) {
+      animation-delay: -0.12s;
+    }
+
+    .sync-indicator i:nth-child(3) {
+      animation-delay: -0.24s;
+    }
+
+    .sync-indicator i:nth-child(4) {
+      animation-delay: -0.36s;
+    }
+
+    .sync-indicator i:nth-child(5) {
+      animation-delay: -0.48s;
+    }
+
+    @keyframes signal {
+      0%,
+      100% {
+        transform: scaleY(0.6);
+      }
+
+      50% {
+        transform: scaleY(3);
       }
     }
-  }
-  function searchMusic(){resetMusic();const version=searchVersion;searchTimer=setTimeout(()=>fetchMusic(version),SEARCH_DELAY_MS);}
 
-  function arrive(){
-    if(ready)return;ready=true;document.body.dataset.ready='true';
-    searchMusic();tone(1046,.65);document.dispatchEvent(new CustomEvent('lain:ready'));
-  }
-  function step(now){
-    if(!playing)return;
-    if(last)position=Math.min(DURATION,position+(now-last)/1000);
-    last=now;render(position);
-    const phase=position<2.1?0:position<5.75?1:position<8.4?2:3;
-    if(phase!==lastSoundPhase){lastSoundPhase=phase;tone([220,640,880,440][phase],.35);}
-    if(position<DURATION)frame=requestAnimationFrame(step);else{playing=false;arrive();}
-  }
-  function pause(){playing=false;cancelAnimationFrame(frame);last=0;}
-  function play(){if(position>=DURATION){replay();return;}if(playing)return;playing=true;last=0;frame=requestAnimationFrame(step);}
-  function seek(s){position=Math.max(0,Math.min(DURATION,Number(s)||0));last=0;render(position);if(position>=DURATION)arrive();}
-  function replay(){
-    pause();ready=false;lastSoundPhase=-1;document.body.dataset.ready='false';
-    resetMusic();seek(0);play();
-  }
-  document.addEventListener('visibilitychange',()=>{
-    last=0;if(!document.hidden)enableSound();
-  });
-  // A normal load always boots. Returning through back/forward cache boots again too.
-  window.addEventListener('pageshow',event=>{if(event.persisted)replay();});
-  window.lainLogin={replay,seek,pause,play,get duration(){return DURATION},get position(){return position}};
-  render(0);enableSound();play();
+    @media (max-width: 650px) {
+      .sync-indicator {
+        right: 22px;
+        bottom: 22px;
+      }
+    }
 
-})();
-</script>
+    @media (prefers-reduced-motion: reduce) {
+      .sync-indicator.fetching i {
+        height: 10px;
+        animation: none;
+      }
+    }
+  </style>
+
+</head>
+
+<body data-ready="false">
+
+<main class="screen" aria-label="Animated Copland OS login inspired by Serial Experiments Lain">
+
+<svg id="scene" viewBox="0 0 1440 1000" preserveAspectRatio="xMidYMid meet" role="group" aria-labelledby="sceneTitle sceneDesc">
+
+<title id="sceneTitle">Copland OS Enterprise</title>
+
+<desc id="sceneDesc">A cyan emblem on deep blue. Login panels assemble, the user is authorized, and the interface settles into a pale blue desktop.</desc>
+
+<defs>
+
+  <radialGradient id="halo"><stop stop-color="#0a18b5" stop-opacity=".74"/><stop offset=".64" stop-color="#020467" stop-opacity=".4"/><stop offset="1" stop-color="#020021" stop-opacity="0"/></radialGradient>
+
+  <radialGradient id="disc" cx="42%" cy="36%" r="64%"><stop stop-color="#124bff" stop-opacity=".8"/><stop offset=".47" stop-color="#0818d8" stop-opacity=".86"/><stop offset=".76" stop-color="#03066d"/><stop offset="1" stop-color="#00000f"/></radialGradient>
+
+  <radialGradient id="orb" cx="36%" cy="30%"><stop stop-color="#26d5e9"/><stop offset=".48" stop-color="#008dce"/><stop offset=".78" stop-color="#042ab9"/><stop offset="1" stop-color="#000345"/></radialGradient>
+
+  <radialGradient id="core"><stop stop-color="#05badd"/><stop offset=".65" stop-color="#008bc6"/><stop offset="1" stop-color="#0443b3"/></radialGradient>
+
+  <linearGradient id="stroke" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#00b6d2"/><stop offset=".57" stop-color="#0798c2"/><stop offset="1" stop-color="#092872"/></linearGradient>
+
+  <filter id="bloom" x="-35%" y="-35%" width="170%" height="170%"><feGaussianBlur stdDeviation="5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+
+  <filter id="soft"><feGaussianBlur stdDeviation="1.4"/></filter>
+
+  <filter id="energyGlow" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="4"/></filter>
+
+  <filter id="textGlow" x="-15%" y="-30%" width="130%" height="160%"><feDropShadow dx="-2" dy="2" stdDeviation="1" flood-color="#000018" flood-opacity=".9"/><feDropShadow dx="0" dy="0" stdDeviation="1.5" flood-color="#20ceeb" flood-opacity=".38"/></filter>
+
+</defs>
+
+<rect id="background" width="1440" height="1000" fill="#020021"/>
+
+<ellipse id="backHalo" cx="740" cy="500" rx="700" ry="640" fill="url(#halo)"/>
+
+<g id="rail"><rect id="railBar" x="84" width="92" height="1000" fill="#075064" opacity=".55"/><path id="railLine" d="M170 0V1000" stroke="#30b9ce" stroke-width="2" opacity=".5"/></g>
+
+<g id="bootBrand" fill="#51c2cf" filter="url(#textGlow)">
+
+  <text transform="translate(167 847) rotate(-90)" font-size="78" letter-spacing="-2">Copland OS Enterprise</text>
+
+  <text transform="translate(237 826) rotate(-90)" font-size="43" font-style="italic">Product by Tachibana Lab.</text>
+
+  <path d="M235 850V1000" stroke="#1db1ca" stroke-width="2" opacity=".7"/>
+
+</g>
+
+<!-- The same vector emblem stays on screen throughout the sequence. -->
+
+<g id="emblem" transform="translate(735 480) scale(1.05)">
+
+  <circle r="265" fill="#126bb2" opacity=".12"/>
+
+  <g filter="url(#bloom)">
+
+    <path d="M-180-149Q-281-100-330 0Q-277 99-190 145 M180-149Q281-100 330 0Q277 99 190 145" fill="none" stroke="url(#stroke)" stroke-width="53" stroke-linecap="round" opacity=".72"/>
+
+    <path d="M-54 161 A180 180 0 1 1 54 161 L54 258Q54 338 147 302 M-54 161L-54 258Q-54 338-147 302" fill="none" stroke="url(#stroke)" stroke-width="52" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <circle r="110" fill="none" stroke="#39bacb" stroke-width="31" opacity=".64"/>
+
+    <circle r="70" fill="url(#core)"/>
+
+    <circle cx="0" cy="-264" r="24" fill="#008ecb"/>
+
+    <circle cx="-291" cy="151" r="31" fill="url(#orb)"/><circle cx="291" cy="151" r="31" fill="url(#orb)"/>
+
+  </g>
+
+</g>
+
+<g id="panels" opacity="0">
+
+  <g id="loginDisc"><ellipse rx="437" ry="147" fill="url(#disc)"/><ellipse rx="415" ry="129" fill="#0929d4" opacity=".08"/></g>
+
+  <g id="kernelDisc"><ellipse rx="270" ry="51" fill="url(#disc)"/></g>
+
+  <g id="voiceDisc"><ellipse rx="375" ry="64" fill="url(#disc)"/></g>
+
+</g>
+
+<g id="guides" stroke="#26bdd2" stroke-width="2" fill="none" opacity="0">
+
+  <path id="loginRule" d="M0 300H844"/><path id="networkRule" d="M427 466V1000"/><path id="kernelRule" d="M1067 266V1000"/><path id="voiceRule" d="M555 775V1000"/>
+
+</g>
+
+<g id="loginLabels" fill="#4cc9d8" filter="url(#textGlow)" opacity="0">
+
+  <text x="282" y="305" font-size="55">Set Login User Name</text>
+
+  <text x="1051" y="317" font-size="55">kernel Use</text>
+
+  <text transform="translate(432 962) rotate(-90)" font-size="51">Bighi</text>
+
+  <text id="voiceLabel" x="533" y="850" font-size="55">Voice Wave</text>
+
+</g>
+
+<g id="energy" opacity="0" fill="#6de3f1"></g>
+
+<g id="waveGroup" opacity="0"><path id="wave" fill="none" stroke="#55d3ec" stroke-width="1.4" opacity=".72"/></g>
+
+<g id="authorize" fill="#42ced4" filter="url(#textGlow)" opacity="0">
+
+  <text x="755" y="523" text-anchor="middle" font-size="136">Authorize User</text>
+
+  <g id="welcome"><text x="718" y="641" font-size="55">Welcome!</text><path d="M715 648H1440" stroke="#30aabc" stroke-width="2"/></g>
+
+</g>
+
+<g id="desktop" opacity="0" fill="#97cce9">
+
+  <text transform="translate(112 807) rotate(-90)" font-family="monospace" font-size="32" letter-spacing="4">Copland OS Enterprises</text>
+
+  <g font-family="monospace" font-size="33" letter-spacing="4">
+
+    <text x="342" y="344">Mail</text><path d="M255 355H476" stroke="#82b9e3" opacity=".4"/>
+
+    <text x="290" y="417">Menu</text><path d="M0 428H406" stroke="#82b9e3" opacity=".4"/>
+
+    <text transform="translate(355 873) rotate(-90)">Bighi</text><path d="M378 536V1000" stroke="#82b9e3" opacity=".35"/>
+
+    <foreignObject x="507" y="781" width="780" height="208"><div xmlns="http://www.w3.org/1999/xhtml" class="music" aria-live="polite" aria-atomic="true"><p id="status">Searching...</p><p id="song-title"></p><p id="artist"></p></div></foreignObject><path d="M493 789V1000" stroke="#82b9e3" opacity=".35"/>
+
+  </g>
+
+  <text x="930" y="576" text-anchor="middle" font-size="36" font-style="italic">Copland OS Enterprise</text>
+
+  <text x="930" y="620" text-anchor="middle" font-size="26" font-style="italic">Product By Tachibana Lab</text>
+
+</g>
+
+</svg>
+
+<div class="crt"></div><div class="vignette"></div>
+
+</main>
+
+<div id="sync-indicator" class="sync-indicator" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+
+<script>
+    /*
+     * Copland OS / Lain-style login animation
+     *
+     * Sections:
+     * 1. Configuration and helpers
+     * 2. SVG energy particles
+     * 3. Main animation renderer
+     * 4. Synthesized boot sound
+     * 5. Last.fm polling
+     * 6. Playback controls
+     */
+
+    const LAST_FM_API_KEY = "4d288c1c7310848430dd818561af10c7";
+    const LAST_FM_USER = "TheBighi";
+
+    const ANIMATION_DURATION_SECONDS = 12;
+    const INITIAL_MUSIC_DELAY_MS = 2500;
+    const MUSIC_REFRESH_INTERVAL_MS = 5000;
+    const MUSIC_REQUEST_TIMEOUT_MS = 4500;
+    const FETCH_INDICATOR_MINIMUM_MS = 700;
+
+    (() => {
+      "use strict";
+
+      const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
+      const ENERGY_PARTICLE_COUNT = 44;
+      const WAVE_POINT_COUNT = 138;
+      const PHASE_TONES = [220, 640, 880, 440];
+
+      // -----------------------------------------------------------------------
+      // DOM and math helpers
+      // -----------------------------------------------------------------------
+
+      const byId = (id) => document.getElementById(id);
+
+      const setAttribute = (id, name, value) => {
+        byId(id).setAttribute(name, value);
+      };
+
+      const setNodeAttribute = (node, name, value) => {
+        node.setAttribute(name, value);
+      };
+
+      const setOpacity = (id, value) => {
+        byId(id).setAttribute("opacity", value.toFixed(4));
+      };
+
+      const clamp01 = (value) => Math.max(0, Math.min(1, value));
+
+      const smoothStep = (value) => {
+        const x = clamp01(value);
+        return x * x * (3 - 2 * x);
+      };
+
+      const ramp = (time, start, end) => {
+        return smoothStep((time - start) / (end - start));
+      };
+
+      const lerp = (start, end, amount) => {
+        return start + (end - start) * amount;
+      };
+
+      // -----------------------------------------------------------------------
+      // SVG energy particles
+      // -----------------------------------------------------------------------
+
+      const energyParticles = [];
+
+      function createEnergyParticles() {
+        const energyGroup = byId("energy");
+
+        for (let index = 0; index < ENERGY_PARTICLE_COUNT; index++) {
+          const group = document.createElementNS(SVG_NAMESPACE, "g");
+          const tail = document.createElementNS(SVG_NAMESPACE, "path");
+          const dot = document.createElementNS(SVG_NAMESPACE, "ellipse");
+
+          tail.setAttribute("stroke", "#5dd9e8");
+          tail.setAttribute("stroke-width", "2");
+          tail.setAttribute("fill", "none");
+
+          const dotRadius = 4 + (index % 4) * 2;
+          dot.setAttribute("rx", dotRadius);
+          dot.setAttribute("ry", dotRadius);
+          dot.setAttribute("filter", "url(#bloom)");
+
+          group.append(tail, dot);
+          energyGroup.append(group);
+          energyParticles.push({ group, tail, dot });
+        }
+      }
+
+      // -----------------------------------------------------------------------
+      // Main animation renderer
+      // -----------------------------------------------------------------------
+
+      function renderBackground(timeline, assembleProgress, finishProgress) {
+        const backgroundRgb = [
+          lerp(2, 49, finishProgress),
+          lerp(0, 78, finishProgress),
+          lerp(33, 149, finishProgress),
+        ].map(Math.round);
+
+        const backgroundColor = `rgb(${backgroundRgb.join(",")})`;
+
+        setAttribute("background", "fill", backgroundColor);
+        document.querySelector(".screen").style.background = backgroundColor;
+
+        setOpacity("backHalo", 1 - finishProgress * 0.9);
+
+        setAttribute("railBar", "x", lerp(84, 66, finishProgress));
+        setAttribute("railBar", "width", lerp(92, 72, finishProgress));
+
+        const railRed = Math.round(lerp(7, 107, finishProgress));
+        const railGreen = Math.round(lerp(80, 194, finishProgress));
+        const railBlue = Math.round(lerp(100, 173, finishProgress));
+
+        setAttribute(
+          "railBar",
+          "fill",
+          `rgb(${railRed},${railGreen},${railBlue})`
+        );
+
+        setOpacity("railLine", 0.5 * (1 - finishProgress));
+        setOpacity("bootBrand", 1 - ramp(timeline, 8.5, 10));
+
+        const emblemScale = lerp(1.05, 0.43, finishProgress);
+        const emblemX = lerp(735, 930, finishProgress);
+        const emblemY = lerp(480, 410, finishProgress);
+
+        setAttribute(
+          "emblem",
+          "transform",
+          `translate(${emblemX} ${emblemY}) scale(${emblemScale})`
+        );
+
+        setOpacity(
+          "emblem",
+          lerp(1, 0.78, assembleProgress) * (1 - finishProgress) +
+            finishProgress * 0.95
+        );
+      }
+
+      function renderLoginPanels(
+        timeline,
+        assembleProgress,
+        authorizationProgress,
+        dissolveProgress
+      ) {
+        setOpacity("panels", assembleProgress * dissolveProgress);
+
+        const loginX = lerp(505, 755, authorizationProgress);
+        const loginY = lerp(385, 480, authorizationProgress);
+        const loginRotation = lerp(-8, 0, authorizationProgress);
+
+        const loginScaleX =
+          lerp(0.06, 1, assembleProgress) *
+          lerp(1, 1.31, authorizationProgress);
+
+        const loginScaleY = lerp(0.06, 1, assembleProgress);
+
+        setAttribute(
+          "loginDisc",
+          "transform",
+          `translate(${loginX} ${loginY}) rotate(${loginRotation}) scale(${loginScaleX} ${loginScaleY})`
+        );
+
+        setAttribute(
+          "kernelDisc",
+          "transform",
+          `translate(1090 ${lerp(330, 276, assembleProgress)}) scale(${lerp(
+            0.02,
+            1,
+            assembleProgress
+          )})`
+        );
+
+        setAttribute(
+          "voiceDisc",
+          "transform",
+          `translate(994 ${lerp(870, 805, assembleProgress)}) scale(${lerp(
+            0.02,
+            1,
+            assembleProgress
+          )})`
+        );
+
+        setOpacity("voiceDisc", 1 - authorizationProgress);
+        setOpacity("guides", assembleProgress * dissolveProgress * 0.7);
+
+        setAttribute("loginRule", "pathLength", "1");
+        setAttribute("loginRule", "stroke-dasharray", "1");
+        setAttribute("loginRule", "stroke-dashoffset", 1 - assembleProgress);
+
+        setOpacity("loginRule", 1 - authorizationProgress);
+        setOpacity("voiceRule", 1 - authorizationProgress);
+
+        setOpacity("loginLabels", ramp(timeline, 2.9, 4) * dissolveProgress);
+
+        byId("loginLabels").children[0].setAttribute(
+          "opacity",
+          1 - authorizationProgress
+        );
+
+        setOpacity("voiceLabel", 1 - authorizationProgress);
+      }
+
+      function renderAuthorization(
+        timeline,
+        authorizationProgress,
+        dissolveProgress
+      ) {
+        setOpacity("authorize", authorizationProgress * dissolveProgress);
+
+        setAttribute(
+          "authorize",
+          "transform",
+          `translate(0 ${lerp(22, 0, authorizationProgress)})`
+        );
+
+        setOpacity("welcome", ramp(timeline, 6.7, 7.4));
+      }
+
+      function renderEnergyParticles(timeline) {
+        const visibleAmount =
+          ramp(timeline, 3.5, 4.4) *
+          (1 - ramp(timeline, 7.8, 9.5)) *
+          0.55;
+
+        setOpacity("energy", visibleAmount);
+
+        energyParticles.forEach(({ group, tail, dot }, index) => {
+          const angle = index * 2.399 + timeline * 0.37;
+          const phase = (timeline * 0.22 + index * 0.137) % 1;
+          const radius = 28 + phase * (index < 16 ? 144 : 355);
+
+          const centerX = index < 16 ? 1072 : 720;
+          const centerY = index < 16 ? 224 : 476;
+
+          const x = centerX + Math.cos(angle) * radius;
+          const y = centerY + Math.sin(angle) * radius * 0.75;
+
+          setNodeAttribute(group, "opacity", Math.sin(phase * Math.PI) * 0.8);
+          setNodeAttribute(dot, "cx", x);
+          setNodeAttribute(dot, "cy", y);
+
+          setNodeAttribute(
+            dot,
+            "transform",
+            `rotate(${(angle * 180) / Math.PI + 90} ${x} ${y})`
+          );
+
+          setNodeAttribute(
+            tail,
+            "d",
+            `M${x} ${y}l${-Math.cos(angle) * 28} ${-Math.sin(angle) * 21}`
+          );
+        });
+      }
+
+      function renderVoiceWave(timeline, authorizationProgress) {
+        setOpacity(
+          "waveGroup",
+          ramp(timeline, 3.9, 4.6) * (1 - authorizationProgress)
+        );
+
+        let path = "";
+
+        for (let index = 0; index < WAVE_POINT_COUNT; index++) {
+          const envelope =
+            0.35 +
+            0.65 *
+              Math.sin((index / (WAVE_POINT_COUNT - 1)) * Math.PI);
+
+          const amplitude =
+            (10 +
+              32 *
+                Math.pow(
+                  Math.sin(index * 0.063 + timeline * 1.6),
+                  4
+                )) *
+            envelope;
+
+          const x = 688 + index * 4.05;
+          const y =
+            790 + Math.sin(index * 2.3 + timeline * 13) * amplitude;
+
+          path +=
+            (index === 0 ? "M" : "L") +
+            x.toFixed(1) +
+            " " +
+            y.toFixed(1);
+        }
+
+        setAttribute("wave", "d", path);
+      }
+
+      function updateStageName(timeline) {
+        if (timeline < 2.1) {
+          document.body.dataset.stage = "boot";
+        } else if (timeline < 5.75) {
+          document.body.dataset.stage = "login";
+        } else if (timeline < 8.4) {
+          document.body.dataset.stage = "authorize";
+        } else {
+          document.body.dataset.stage = "desktop";
+        }
+      }
+
+      function render(seconds) {
+        const timeline = (seconds / ANIMATION_DURATION_SECONDS) * 12;
+
+        const assembleProgress = ramp(timeline, 2.1, 3.9);
+        const authorizationProgress = ramp(timeline, 5.75, 6.85);
+        const finishProgress = ramp(timeline, 8.4, 11.5);
+        const dissolveProgress = 1 - ramp(timeline, 8.4, 9.8);
+
+        renderBackground(timeline, assembleProgress, finishProgress);
+
+        renderLoginPanels(
+          timeline,
+          assembleProgress,
+          authorizationProgress,
+          dissolveProgress
+        );
+
+        renderAuthorization(
+          timeline,
+          authorizationProgress,
+          dissolveProgress
+        );
+
+        renderEnergyParticles(timeline);
+        renderVoiceWave(timeline, authorizationProgress);
+
+        setOpacity("desktop", ramp(timeline, 9.6, 11.6));
+        updateStageName(timeline);
+      }
+
+      // -----------------------------------------------------------------------
+      // Synthesized boot sound
+      // -----------------------------------------------------------------------
+
+      let audioContext = null;
+      let masterGain = null;
+      let audioInitialized = false;
+      let lastSoundPhase = -1;
+
+      function createSoundSystem() {
+        if (audioInitialized) return;
+
+        const AudioContextClass =
+          window.AudioContext || window.webkitAudioContext;
+
+        if (!AudioContextClass) return;
+
+        audioContext = new AudioContextClass();
+
+        masterGain = audioContext.createGain();
+        masterGain.gain.value = 0.25;
+        masterGain.connect(audioContext.destination);
+
+        const humGain = audioContext.createGain();
+        humGain.gain.value = 0.045;
+        humGain.connect(masterGain);
+
+        [55, 110, 164.8].forEach((frequency, index) => {
+          const oscillator = audioContext.createOscillator();
+
+          oscillator.type = index === 1 ? "triangle" : "sine";
+          oscillator.frequency.value = frequency;
+          oscillator.connect(humGain);
+          oscillator.start();
+        });
+
+        const noiseBuffer = audioContext.createBuffer(
+          1,
+          audioContext.sampleRate * 3,
+          audioContext.sampleRate
+        );
+
+        const noiseData = noiseBuffer.getChannelData(0);
+
+        for (let index = 0; index < noiseData.length; index++) {
+          noiseData[index] = Math.random() * 2 - 1;
+        }
+
+        const noiseSource = audioContext.createBufferSource();
+        noiseSource.buffer = noiseBuffer;
+        noiseSource.loop = true;
+
+        const noiseFilter = audioContext.createBiquadFilter();
+        noiseFilter.type = "bandpass";
+        noiseFilter.frequency.value = 1100;
+        noiseFilter.Q.value = 0.75;
+
+        const noiseGain = audioContext.createGain();
+        noiseGain.gain.value = 0.023;
+
+        noiseSource.connect(noiseFilter);
+        noiseFilter.connect(noiseGain);
+        noiseGain.connect(masterGain);
+        noiseSource.start();
+
+        const lfo = audioContext.createOscillator();
+        const lfoDepth = audioContext.createGain();
+
+        lfo.frequency.value = 0.17;
+        lfoDepth.gain.value = 550;
+
+        lfo.connect(lfoDepth);
+        lfoDepth.connect(noiseFilter.frequency);
+        lfo.start();
+
+        audioInitialized = true;
+      }
+
+      function enableSound() {
+        try {
+          createSoundSystem();
+
+          if (audioContext && audioContext.state !== "running") {
+            audioContext.resume().catch(() => {});
+          }
+        } catch {
+          // Decorative audio should never break the page.
+        }
+      }
+
+      function playTone(frequency = 740, length = 0.17) {
+        if (!audioContext || audioContext.state !== "running") return;
+
+        const now = audioContext.currentTime;
+        const oscillator = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+
+        oscillator.type = "sine";
+        oscillator.frequency.setValueAtTime(frequency, now);
+        oscillator.frequency.exponentialRampToValueAtTime(
+          frequency * 0.72,
+          now + length
+        );
+
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(0.15, now + 0.015);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + length);
+
+        oscillator.connect(gain);
+        gain.connect(masterGain);
+
+        oscillator.start(now);
+        oscillator.stop(now + length + 0.02);
+
+        oscillator.onended = () => {
+          oscillator.disconnect();
+          gain.disconnect();
+        };
+      }
+
+      function unlockSound() {
+        if (audioContext?.state !== "running") {
+          enableSound();
+        }
+      }
+
+      document.addEventListener("pointerdown", unlockSound);
+      document.addEventListener("keydown", unlockSound);
+
+      // -----------------------------------------------------------------------
+      // Last.fm polling
+      // -----------------------------------------------------------------------
+
+      let musicRefreshTimer = 0;
+      let indicatorTimer = 0;
+      let activeMusicRequest = null;
+      let musicRequestVersion = 0;
+      let hasTrack = false;
+
+      function updateMusicText(status, song = "", artist = "") {
+        const values = [
+          ["status", status],
+          ["song-title", song],
+          ["artist", artist],
+        ];
+
+        for (const [id, text] of values) {
+          const element = byId(id);
+
+          if (element.textContent !== text) {
+            element.textContent = text;
+          }
+        }
+
+        byId("song-title").title = song;
+      }
+
+      function resetMusicSearch() {
+        clearTimeout(musicRefreshTimer);
+        clearTimeout(indicatorTimer);
+
+        activeMusicRequest?.abort();
+        activeMusicRequest = null;
+
+        musicRequestVersion++;
+        hasTrack = false;
+
+        byId("sync-indicator").classList.remove("fetching");
+        updateMusicText("Searching...");
+      }
+
+      function getArtistName(track) {
+        if (typeof track.artist === "string") {
+          return track.artist;
+        }
+
+        return track.artist?.["#text"] || track.artist?.name || "";
+      }
+
+      async function fetchMusic(version) {
+        if (
+          version !== musicRequestVersion ||
+          !isReady ||
+          activeMusicRequest
+        ) {
+          return;
+        }
+
+        const requestStartedAt = performance.now();
+        const controller = new AbortController();
+
+        activeMusicRequest = controller;
+
+        clearTimeout(indicatorTimer);
+        byId("sync-indicator").classList.add("fetching");
+
+        const requestTimeout = setTimeout(() => {
+          controller.abort();
+        }, MUSIC_REQUEST_TIMEOUT_MS);
+
+        try {
+          const params = new URLSearchParams({
+            method: "user.getrecenttracks",
+            user: LAST_FM_USER,
+            api_key: LAST_FM_API_KEY,
+            format: "json",
+            limit: "1",
+          });
+
+          const response = await fetch(
+            `https://ws.audioscrobbler.com/2.0/?${params}`,
+            {
+              signal: controller.signal,
+              cache: "no-store",
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+          }
+
+          const data = await response.json();
+
+          if (data.error) {
+            throw new Error(data.message || "Last.fm error");
+          }
+
+          if (version !== musicRequestVersion) return;
+
+          const tracks = data.recenttracks?.track;
+          const track = Array.isArray(tracks) ? tracks[0] : tracks;
+
+          if (!track?.name) {
+            hasTrack = false;
+            updateMusicText("No recent tracks.");
+            return;
+          }
+
+          const status =
+            track["@attr"]?.nowplaying === "true"
+              ? "Now Playing:"
+              : "Last Played:";
+
+          hasTrack = true;
+          updateMusicText(status, track.name, getArtistName(track));
+        } catch {
+          if (version !== musicRequestVersion) return;
+
+          if (!hasTrack) {
+            updateMusicText(
+              "Connection unavailable.",
+              "Reconnecting..."
+            );
+          }
+        } finally {
+          clearTimeout(requestTimeout);
+
+          if (activeMusicRequest === controller) {
+            activeMusicRequest = null;
+          }
+
+          if (version === musicRequestVersion && isReady) {
+            const elapsed = performance.now() - requestStartedAt;
+
+            indicatorTimer = setTimeout(() => {
+              byId("sync-indicator").classList.remove("fetching");
+            }, Math.max(0, FETCH_INDICATOR_MINIMUM_MS - elapsed));
+
+            musicRefreshTimer = setTimeout(() => {
+              fetchMusic(version);
+            }, Math.max(0, MUSIC_REFRESH_INTERVAL_MS - elapsed));
+          }
+        }
+      }
+
+      function startMusicSearch() {
+        resetMusicSearch();
+
+        const version = musicRequestVersion;
+
+        musicRefreshTimer = setTimeout(() => {
+          fetchMusic(version);
+        }, INITIAL_MUSIC_DELAY_MS);
+      }
+
+      // -----------------------------------------------------------------------
+      // Animation playback
+      // -----------------------------------------------------------------------
+
+      let animationPosition = 0;
+      let isPlaying = false;
+      let previousFrameTime = 0;
+      let animationFrameId = 0;
+      let isReady = false;
+
+      function finishBootSequence() {
+        if (isReady) return;
+
+        isReady = true;
+        document.body.dataset.ready = "true";
+
+        startMusicSearch();
+        playTone(1046, 0.65);
+
+        document.dispatchEvent(new CustomEvent("lain:ready"));
+      }
+
+      function getSoundPhase(position) {
+        if (position < 2.1) return 0;
+        if (position < 5.75) return 1;
+        if (position < 8.4) return 2;
+        return 3;
+      }
+
+      function animationStep(now) {
+        if (!isPlaying) return;
+
+        if (previousFrameTime) {
+          const deltaSeconds = (now - previousFrameTime) / 1000;
+
+          animationPosition = Math.min(
+            ANIMATION_DURATION_SECONDS,
+            animationPosition + deltaSeconds
+          );
+        }
+
+        previousFrameTime = now;
+        render(animationPosition);
+
+        const currentSoundPhase = getSoundPhase(animationPosition);
+
+        if (currentSoundPhase !== lastSoundPhase) {
+          lastSoundPhase = currentSoundPhase;
+          playTone(PHASE_TONES[currentSoundPhase], 0.35);
+        }
+
+        if (animationPosition < ANIMATION_DURATION_SECONDS) {
+          animationFrameId = requestAnimationFrame(animationStep);
+        } else {
+          isPlaying = false;
+          finishBootSequence();
+        }
+      }
+
+      function pause() {
+        isPlaying = false;
+        cancelAnimationFrame(animationFrameId);
+        previousFrameTime = 0;
+      }
+
+      function play() {
+        if (animationPosition >= ANIMATION_DURATION_SECONDS) {
+          replay();
+          return;
+        }
+
+        if (isPlaying) return;
+
+        isPlaying = true;
+        previousFrameTime = 0;
+        animationFrameId = requestAnimationFrame(animationStep);
+      }
+
+      function seek(seconds) {
+        animationPosition = Math.max(
+          0,
+          Math.min(ANIMATION_DURATION_SECONDS, Number(seconds) || 0)
+        );
+
+        previousFrameTime = 0;
+        render(animationPosition);
+
+        if (animationPosition >= ANIMATION_DURATION_SECONDS) {
+          finishBootSequence();
+        }
+      }
+
+      function replay() {
+        pause();
+
+        isReady = false;
+        lastSoundPhase = -1;
+        document.body.dataset.ready = "false";
+
+        resetMusicSearch();
+        seek(0);
+        play();
+      }
+
+      document.addEventListener("visibilitychange", () => {
+        previousFrameTime = 0;
+
+        if (!document.hidden) {
+          enableSound();
+        }
+      });
+
+      window.addEventListener("pageshow", (event) => {
+        if (event.persisted) {
+          replay();
+        }
+      });
+
+      window.lainLogin = {
+        replay,
+        seek,
+        pause,
+        play,
+
+        get duration() {
+          return ANIMATION_DURATION_SECONDS;
+        },
+
+        get position() {
+          return animationPosition;
+        },
+      };
+
+      createEnergyParticles();
+      render(0);
+      enableSound();
+      play();
+    })();
+  </script>
+
 </body>
+
 </html>
