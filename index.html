@@ -32,7 +32,11 @@
     .screen {
       position: fixed;
       inset: 0;
+      overflow: hidden;
       background: #020021;
+      border-radius: 7% / 6%;
+      transform: scale(1.03);
+      transform-origin: center;
     }
 
     svg {
@@ -46,21 +50,35 @@
       position: absolute;
       inset: 0;
       pointer-events: none;
-      opacity: 0.55;
-      background: repeating-linear-gradient(
-        0deg,
-        rgba(0, 0, 22, 0.1) 0,
-        rgba(0, 0, 22, 0.1) 1px,
-        transparent 1px,
-        transparent 3px
-      );
+      opacity: 0.72;
+      background:
+        repeating-linear-gradient(
+          0deg,
+          rgba(0, 0, 22, 0.1) 0,
+          rgba(0, 0, 22, 0.1) 1px,
+          transparent 1px,
+          transparent 3px
+        ),
+        repeating-linear-gradient(
+          90deg,
+          rgba(255, 70, 90, 0.07) 0 1px,
+          rgba(70, 255, 170, 0.05) 1px 2px,
+          rgba(70, 130, 255, 0.07) 2px 3px
+        );
     }
 
     .vignette {
       position: absolute;
       inset: 0;
       pointer-events: none;
-      box-shadow: inset 0 0 13vw 2vw rgba(0, 0, 25, 0.25);
+      background: radial-gradient(
+        ellipse at center,
+        rgba(115, 225, 255, 0.04) 0 38%,
+        transparent 62%,
+        rgba(0, 0, 25, 0.28) 100%
+      );
+      border-radius: inherit;
+      box-shadow: inset 0 0 16vw 3vw rgba(0, 0, 25, 0.42);
     }
 
     /* Last.fm track display */
@@ -325,7 +343,7 @@
      * 1. Configuration and helpers
      * 2. SVG energy particles
      * 3. Main animation renderer
-     * 4. Synthesized boot sound
+     * 4. Boot soundtrack
      * 5. Last.fm polling
      * 6. Playback controls
      */
@@ -345,8 +363,6 @@
       const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
       const ENERGY_PARTICLE_COUNT = 44;
       const WAVE_POINT_COUNT = 138;
-      const PHASE_TONES = [220, 640, 880, 440];
-
       // -----------------------------------------------------------------------
       // DOM and math helpers
       // -----------------------------------------------------------------------
@@ -657,129 +673,22 @@
       }
 
       // -----------------------------------------------------------------------
-      // Synthesized boot sound
+      // Boot soundtrack
       // -----------------------------------------------------------------------
 
-      let audioContext = null;
-      let masterGain = null;
-      let audioInitialized = false;
-      let lastSoundPhase = -1;
-
-      function createSoundSystem() {
-        if (audioInitialized) return;
-
-        const AudioContextClass =
-          window.AudioContext || window.webkitAudioContext;
-
-        if (!AudioContextClass) return;
-
-        audioContext = new AudioContextClass();
-
-        masterGain = audioContext.createGain();
-        masterGain.gain.value = 0.25;
-        masterGain.connect(audioContext.destination);
-
-        const humGain = audioContext.createGain();
-        humGain.gain.value = 0.045;
-        humGain.connect(masterGain);
-
-        [55, 110, 164.8].forEach((frequency, index) => {
-          const oscillator = audioContext.createOscillator();
-
-          oscillator.type = index === 1 ? "triangle" : "sine";
-          oscillator.frequency.value = frequency;
-          oscillator.connect(humGain);
-          oscillator.start();
-        });
-
-        const noiseBuffer = audioContext.createBuffer(
-          1,
-          audioContext.sampleRate * 3,
-          audioContext.sampleRate
-        );
-
-        const noiseData = noiseBuffer.getChannelData(0);
-
-        for (let index = 0; index < noiseData.length; index++) {
-          noiseData[index] = Math.random() * 2 - 1;
-        }
-
-        const noiseSource = audioContext.createBufferSource();
-        noiseSource.buffer = noiseBuffer;
-        noiseSource.loop = true;
-
-        const noiseFilter = audioContext.createBiquadFilter();
-        noiseFilter.type = "bandpass";
-        noiseFilter.frequency.value = 1100;
-        noiseFilter.Q.value = 0.75;
-
-        const noiseGain = audioContext.createGain();
-        noiseGain.gain.value = 0.023;
-
-        noiseSource.connect(noiseFilter);
-        noiseFilter.connect(noiseGain);
-        noiseGain.connect(masterGain);
-        noiseSource.start();
-
-        const lfo = audioContext.createOscillator();
-        const lfoDepth = audioContext.createGain();
-
-        lfo.frequency.value = 0.17;
-        lfoDepth.gain.value = 550;
-
-        lfo.connect(lfoDepth);
-        lfoDepth.connect(noiseFilter.frequency);
-        lfo.start();
-
-        audioInitialized = true;
-      }
+      const bootAudio = new Audio("assets/ComputaTypeBeat.mp3");
+      bootAudio.loop = true;
+      bootAudio.preload = "auto";
+      bootAudio.volume = 0.25;
 
       function enableSound() {
-        try {
-          createSoundSystem();
-
-          if (audioContext && audioContext.state !== "running") {
-            audioContext.resume().catch(() => {});
-          }
-        } catch {
-          // Decorative audio should never break the page.
-        }
-      }
-
-      function playTone(frequency = 740, length = 0.17) {
-        if (!audioContext || audioContext.state !== "running") return;
-
-        const now = audioContext.currentTime;
-        const oscillator = audioContext.createOscillator();
-        const gain = audioContext.createGain();
-
-        oscillator.type = "sine";
-        oscillator.frequency.setValueAtTime(frequency, now);
-        oscillator.frequency.exponentialRampToValueAtTime(
-          frequency * 0.72,
-          now + length
-        );
-
-        gain.gain.setValueAtTime(0, now);
-        gain.gain.linearRampToValueAtTime(0.15, now + 0.015);
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + length);
-
-        oscillator.connect(gain);
-        gain.connect(masterGain);
-
-        oscillator.start(now);
-        oscillator.stop(now + length + 0.02);
-
-        oscillator.onended = () => {
-          oscillator.disconnect();
-          gain.disconnect();
-        };
+        bootAudio.play().catch(() => {
+          // Browsers may require the first pointer or keyboard interaction.
+        });
       }
 
       function unlockSound() {
-        if (audioContext?.state !== "running") {
-          enableSound();
-        }
+        enableSound();
       }
 
       document.addEventListener("pointerdown", unlockSound);
@@ -958,16 +867,7 @@
         document.body.dataset.ready = "true";
 
         startMusicSearch();
-        playTone(1046, 0.65);
-
         document.dispatchEvent(new CustomEvent("lain:ready"));
-      }
-
-      function getSoundPhase(position) {
-        if (position < 2.1) return 0;
-        if (position < 5.75) return 1;
-        if (position < 8.4) return 2;
-        return 3;
       }
 
       function animationStep(now) {
@@ -984,13 +884,6 @@
 
         previousFrameTime = now;
         render(animationPosition);
-
-        const currentSoundPhase = getSoundPhase(animationPosition);
-
-        if (currentSoundPhase !== lastSoundPhase) {
-          lastSoundPhase = currentSoundPhase;
-          playTone(PHASE_TONES[currentSoundPhase], 0.35);
-        }
 
         if (animationPosition < ANIMATION_DURATION_SECONDS) {
           animationFrameId = requestAnimationFrame(animationStep);
@@ -1037,7 +930,7 @@
         pause();
 
         isReady = false;
-        lastSoundPhase = -1;
+        bootAudio.currentTime = 0;
         document.body.dataset.ready = "false";
 
         resetMusicSearch();
