@@ -113,6 +113,85 @@
       opacity: 0.72;
     }
 
+    #mail-button {
+      pointer-events: none;
+      outline: none;
+    }
+
+    body[data-ready="true"] #mail-button {
+      pointer-events: auto;
+      cursor: pointer;
+    }
+
+    #mail-button:hover,
+    #mail-button:focus-visible {
+      fill: #d2f7ff;
+      filter: drop-shadow(0 0 8px rgba(181, 239, 255, 0.8));
+    }
+
+    .mail-panel {
+      position: absolute;
+      z-index: 2;
+      top: 19%;
+      left: 18%;
+      width: min(560px, 64vw);
+      border: 1px solid rgba(167, 226, 245, 0.75);
+      background: rgba(24, 56, 119, 0.94);
+      box-shadow: 12px 14px 0 rgba(7, 30, 83, 0.45), 0 0 28px rgba(103, 211, 239, 0.2);
+      color: #b5e5f5;
+      font-family: monospace;
+    }
+
+    .mail-panel[hidden] {
+      display: none;
+    }
+
+    .mail-panel__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      touch-action: none;
+      border-bottom: 1px solid rgba(167, 226, 245, 0.55);
+      background: rgba(83, 156, 195, 0.28);
+      cursor: move;
+      user-select: none;
+    }
+
+    .mail-panel__title {
+      margin: 0;
+      font-size: 18px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+
+    .mail-panel__close {
+      width: 30px;
+      height: 26px;
+      border: 1px solid rgba(181, 229, 245, 0.7);
+      background: rgba(4, 27, 78, 0.65);
+      color: inherit;
+      cursor: pointer;
+      font: inherit;
+    }
+
+    .mail-panel__close:hover,
+    .mail-panel__close:focus-visible {
+      background: #86c4df;
+      color: #06184d;
+    }
+
+    .mail-panel__body {
+      min-height: 180px;
+      padding: 22px;
+    }
+
+    .mail-panel__body p {
+      margin: 0;
+      font-size: 17px;
+      letter-spacing: 1px;
+    }
+
     /* Small activity indicator shown while Last.fm is being refreshed */
     .sync-indicator {
       position: fixed;
@@ -177,6 +256,12 @@
     }
 
     @media (max-width: 650px) {
+      .mail-panel {
+        top: 22%;
+        left: 10%;
+        width: 80vw;
+      }
+
       .sync-indicator {
         right: 22px;
         bottom: 22px;
@@ -311,7 +396,7 @@
 
   <g font-family="monospace" font-size="33" letter-spacing="4">
 
-    <text x="342" y="344">Mail</text><path d="M255 355H476" stroke="#82b9e3" opacity=".4"/>
+    <text id="mail-button" x="342" y="344" role="button" tabindex="0" aria-controls="mail-panel" aria-expanded="false">Mail</text><path d="M255 355H476" stroke="#82b9e3" opacity=".4"/>
 
     <text x="290" y="417">Menu</text><path d="M0 428H406" stroke="#82b9e3" opacity=".4"/>
 
@@ -328,6 +413,16 @@
 </g>
 
 </svg>
+
+<section id="mail-panel" class="mail-panel" aria-labelledby="mail-panel-title" hidden>
+  <header id="mail-panel-handle" class="mail-panel__header" title="Drag to move">
+    <h2 id="mail-panel-title" class="mail-panel__title">Mail</h2>
+    <button id="mail-panel-close" class="mail-panel__close" type="button" aria-label="Close mail">X</button>
+  </header>
+  <div class="mail-panel__body">
+    <p>Inbox is empty.</p>
+  </div>
+</section>
 
 <div class="crt"></div><div class="vignette"></div>
 
@@ -681,6 +776,9 @@
       bootAudio.preload = "auto";
       bootAudio.volume = 0.25;
 
+      const clickAudio = new Audio("assets/ComputaClick.mp3");
+      clickAudio.preload = "auto";
+
       function enableSound() {
         bootAudio.play().catch(() => {
           // Browsers may require the first pointer or keyboard interaction.
@@ -693,6 +791,93 @@
 
       document.addEventListener("pointerdown", unlockSound);
       document.addEventListener("keydown", unlockSound);
+      document.addEventListener("click", () => {
+        clickAudio.currentTime = 0;
+        clickAudio.play().catch(() => {});
+      });
+
+      const mailButton = byId("mail-button");
+      const mailPanel = byId("mail-panel");
+      const mailPanelClose = byId("mail-panel-close");
+      const mailPanelHandle = byId("mail-panel-handle");
+      let mailDrag = null;
+
+      function keepMailOnScreen() {
+        if (mailPanel.hidden) return;
+
+        const container = mailPanel.offsetParent;
+        const maximumLeft = Math.max(0, container.clientWidth - mailPanel.offsetWidth);
+        const maximumTop = Math.max(0, container.clientHeight - mailPanel.offsetHeight);
+
+        mailPanel.style.left = `${Math.max(0, Math.min(maximumLeft, mailPanel.offsetLeft))}px`;
+        mailPanel.style.top = `${Math.max(0, Math.min(maximumTop, mailPanel.offsetTop))}px`;
+      }
+
+      function openMail() {
+        if (!isReady) return;
+
+        mailPanel.hidden = false;
+        mailButton.setAttribute("aria-expanded", "true");
+        keepMailOnScreen();
+        mailPanelClose.focus();
+      }
+
+      function closeMail() {
+        mailPanel.hidden = true;
+        mailButton.setAttribute("aria-expanded", "false");
+        mailButton.focus();
+      }
+
+      mailButton.addEventListener("click", openMail);
+      mailButton.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          openMail();
+        }
+      });
+      mailPanelClose.addEventListener("click", closeMail);
+      mailPanelHandle.addEventListener("pointerdown", (event) => {
+        if (event.button !== 0 || event.target.closest("button")) return;
+
+        const container = mailPanel.offsetParent;
+        const containerRect = container.getBoundingClientRect();
+
+        mailDrag = {
+          pointerId: event.pointerId,
+          startX: event.clientX,
+          startY: event.clientY,
+          startLeft: mailPanel.offsetLeft,
+          startTop: mailPanel.offsetTop,
+          scaleX: containerRect.width / container.offsetWidth,
+          scaleY: containerRect.height / container.offsetHeight,
+        };
+
+        mailPanelHandle.setPointerCapture(event.pointerId);
+        event.preventDefault();
+      });
+      mailPanelHandle.addEventListener("pointermove", (event) => {
+        if (!mailDrag || event.pointerId !== mailDrag.pointerId) return;
+
+        mailPanel.style.left = `${mailDrag.startLeft + (event.clientX - mailDrag.startX) / mailDrag.scaleX}px`;
+        mailPanel.style.top = `${mailDrag.startTop + (event.clientY - mailDrag.startY) / mailDrag.scaleY}px`;
+        keepMailOnScreen();
+      });
+
+      function finishMailDrag(event) {
+        if (!mailDrag || event.pointerId !== mailDrag.pointerId) return;
+
+        mailDrag = null;
+      }
+
+      mailPanelHandle.addEventListener("pointerup", finishMailDrag);
+      mailPanelHandle.addEventListener("pointercancel", finishMailDrag);
+      mailPanelHandle.addEventListener("lostpointercapture", finishMailDrag);
+      window.addEventListener("resize", keepMailOnScreen);
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && !mailPanel.hidden) {
+          closeMail();
+        }
+      });
 
       // -----------------------------------------------------------------------
       // Last.fm polling
@@ -932,6 +1117,8 @@
         isReady = false;
         bootAudio.currentTime = 0;
         document.body.dataset.ready = "false";
+        mailPanel.hidden = true;
+        mailButton.setAttribute("aria-expanded", "false");
 
         resetMusicSearch();
         seek(0);
