@@ -48,6 +48,7 @@
     /* CRT-style overlays */
     .crt {
       position: absolute;
+      z-index: 3;
       inset: 0;
       pointer-events: none;
       opacity: 0.72;
@@ -69,6 +70,7 @@
 
     .vignette {
       position: absolute;
+      z-index: 3;
       inset: 0;
       pointer-events: none;
       background: radial-gradient(
@@ -113,18 +115,22 @@
       opacity: 0.72;
     }
 
-    #mail-button {
+    #mail-button,
+    #menu-button {
       pointer-events: none;
       outline: none;
     }
 
-    body[data-ready="true"] #mail-button {
+    body[data-ready="true"] #mail-button,
+    body[data-ready="true"] #menu-button {
       pointer-events: auto;
       cursor: pointer;
     }
 
     #mail-button:hover,
-    #mail-button:focus-visible {
+    #mail-button:focus-visible,
+    #menu-button:hover,
+    #menu-button:focus-visible {
       fill: #d2f7ff;
       filter: drop-shadow(0 0 8px rgba(181, 239, 255, 0.8));
     }
@@ -190,6 +196,100 @@
       margin: 0;
       font-size: 17px;
       letter-spacing: 1px;
+    }
+
+    .menu-panel {
+      top: 24%;
+      left: 23%;
+    }
+
+    .menu-panel .mail-panel__body {
+      overflow: hidden;
+    }
+
+    .menu-option {
+      display: flex;
+      width: 100%;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      border: 1px solid rgba(167, 226, 245, 0.55);
+      background: rgba(4, 27, 78, 0.42);
+      color: inherit;
+      cursor: pointer;
+      font: inherit;
+      font-size: 18px;
+      letter-spacing: 3px;
+      text-align: left;
+      text-transform: uppercase;
+    }
+
+    .menu-option:hover,
+    .menu-option:focus-visible,
+    .menu-back:hover,
+    .menu-back:focus-visible {
+      background: #86c4df;
+      color: #06184d;
+    }
+
+    .menu-option__arrow {
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .gaming-ranks__heading {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .menu-back {
+      width: 34px;
+      height: 30px;
+      border: 1px solid rgba(181, 229, 245, 0.7);
+      background: rgba(4, 27, 78, 0.65);
+      color: inherit;
+      cursor: pointer;
+      font: inherit;
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    .gaming-ranks {
+      margin: 0;
+    }
+
+    .gaming-ranks dl {
+      margin: 0;
+    }
+
+    .gaming-ranks__title {
+      margin: 0;
+      color: #d2f7ff;
+      font-size: 19px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+    }
+
+    .gaming-ranks__row {
+      display: flex;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 11px 0;
+      border-top: 1px solid rgba(167, 226, 245, 0.28);
+      font-size: 17px;
+      letter-spacing: 1px;
+    }
+
+    .gaming-ranks__row dt,
+    .gaming-ranks__row dd {
+      margin: 0;
+    }
+
+    .gaming-ranks__row dd {
+      color: #d2f7ff;
+      text-align: right;
     }
 
     /* Small activity indicator shown while Last.fm is being refreshed */
@@ -270,8 +370,11 @@
 
     @media (prefers-reduced-motion: reduce) {
       .sync-indicator.fetching i {
-        height: 10px;
         animation: none;
+      }
+
+      .sync-indicator.fetching i {
+        height: 10px;
       }
     }
   </style>
@@ -398,7 +501,7 @@
 
     <text id="mail-button" x="342" y="344" role="button" tabindex="0" aria-controls="mail-panel" aria-expanded="false">Mail</text><path d="M255 355H476" stroke="#82b9e3" opacity=".4"/>
 
-    <text x="290" y="417">Menu</text><path d="M0 428H406" stroke="#82b9e3" opacity=".4"/>
+    <text id="menu-button" x="290" y="417" role="button" tabindex="0" aria-controls="menu-panel" aria-expanded="false">Menu</text><path d="M0 428H406" stroke="#82b9e3" opacity=".4"/>
 
     <text transform="translate(355 873) rotate(-90)">Bighi</text><path d="M378 536V1000" stroke="#82b9e3" opacity=".35"/>
 
@@ -414,13 +517,38 @@
 
 </svg>
 
-<section id="mail-panel" class="mail-panel" aria-labelledby="mail-panel-title" hidden>
+<section id="mail-panel" class="mail-panel" role="dialog" aria-labelledby="mail-panel-title" hidden>
   <header id="mail-panel-handle" class="mail-panel__header" title="Drag to move">
     <h2 id="mail-panel-title" class="mail-panel__title">Mail</h2>
     <button id="mail-panel-close" class="mail-panel__close" type="button" aria-label="Close mail">X</button>
   </header>
   <div class="mail-panel__body">
     <p>Inbox is empty.</p>
+  </div>
+</section>
+
+<section id="menu-panel" class="mail-panel menu-panel" role="dialog" aria-labelledby="menu-panel-title" hidden>
+  <header id="menu-panel-handle" class="mail-panel__header" title="Drag to move">
+    <h2 id="menu-panel-title" class="mail-panel__title">Menu</h2>
+    <button id="menu-panel-close" class="mail-panel__close" type="button" aria-label="Close menu">X</button>
+  </header>
+  <div class="mail-panel__body">
+    <div id="menu-home" class="menu-view">
+      <button id="ranks-button" class="menu-option" type="button" aria-controls="ranks-view" aria-expanded="false">
+        <span>Ranks</span><span class="menu-option__arrow" aria-hidden="true">&gt;</span>
+      </button>
+    </div>
+    <section id="ranks-view" class="menu-view gaming-ranks" aria-labelledby="gaming-ranks-title" hidden>
+      <div class="gaming-ranks__heading">
+        <button id="ranks-back" class="menu-back" type="button" aria-label="Back to menu">&larr;</button>
+        <h3 id="gaming-ranks-title" class="gaming-ranks__title">Ranks</h3>
+      </div>
+      <dl>
+        <div class="gaming-ranks__row"><dt>Fortnite</dt><dd>Unreal</dd></div>
+        <div class="gaming-ranks__row"><dt>Valorant</dt><dd>Ascendant</dd></div>
+        <div class="gaming-ranks__row"><dt>Rainbow Six Siege</dt><dd>Platinum</dd></div>
+      </dl>
+    </section>
   </div>
 </section>
 
@@ -796,86 +924,132 @@
         clickAudio.play().catch(() => {});
       });
 
-      const mailButton = byId("mail-button");
-      const mailPanel = byId("mail-panel");
-      const mailPanelClose = byId("mail-panel-close");
-      const mailPanelHandle = byId("mail-panel-handle");
-      let mailDrag = null;
+      const desktopPanels = [];
 
-      function keepMailOnScreen() {
-        if (mailPanel.hidden) return;
+      function setupDesktopPanel(buttonId, panelId, closeId, handleId) {
+        const button = byId(buttonId);
+        const panel = byId(panelId);
+        const closeButton = byId(closeId);
+        const handle = byId(handleId);
+        let drag = null;
 
-        const container = mailPanel.offsetParent;
-        const maximumLeft = Math.max(0, container.clientWidth - mailPanel.offsetWidth);
-        const maximumTop = Math.max(0, container.clientHeight - mailPanel.offsetHeight);
+        function keepOnScreen() {
+          if (panel.hidden) return;
 
-        mailPanel.style.left = `${Math.max(0, Math.min(maximumLeft, mailPanel.offsetLeft))}px`;
-        mailPanel.style.top = `${Math.max(0, Math.min(maximumTop, mailPanel.offsetTop))}px`;
-      }
+          const container = panel.offsetParent;
+          const maximumLeft = Math.max(0, container.clientWidth - panel.offsetWidth);
+          const maximumTop = Math.max(0, container.clientHeight - panel.offsetHeight);
 
-      function openMail() {
-        if (!isReady) return;
-
-        mailPanel.hidden = false;
-        mailButton.setAttribute("aria-expanded", "true");
-        keepMailOnScreen();
-        mailPanelClose.focus();
-      }
-
-      function closeMail() {
-        mailPanel.hidden = true;
-        mailButton.setAttribute("aria-expanded", "false");
-        mailButton.focus();
-      }
-
-      mailButton.addEventListener("click", openMail);
-      mailButton.addEventListener("keydown", (event) => {
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          openMail();
+          panel.style.left = `${Math.max(0, Math.min(maximumLeft, panel.offsetLeft))}px`;
+          panel.style.top = `${Math.max(0, Math.min(maximumTop, panel.offsetTop))}px`;
         }
-      });
-      mailPanelClose.addEventListener("click", closeMail);
-      mailPanelHandle.addEventListener("pointerdown", (event) => {
-        if (event.button !== 0 || event.target.closest("button")) return;
 
-        const container = mailPanel.offsetParent;
-        const containerRect = container.getBoundingClientRect();
+        function hide(restoreFocus = false) {
+          panel.hidden = true;
+          button.setAttribute("aria-expanded", "false");
 
-        mailDrag = {
-          pointerId: event.pointerId,
-          startX: event.clientX,
-          startY: event.clientY,
-          startLeft: mailPanel.offsetLeft,
-          startTop: mailPanel.offsetTop,
-          scaleX: containerRect.width / container.offsetWidth,
-          scaleY: containerRect.height / container.offsetHeight,
-        };
+          if (restoreFocus) button.focus();
+        }
 
-        mailPanelHandle.setPointerCapture(event.pointerId);
-        event.preventDefault();
-      });
-      mailPanelHandle.addEventListener("pointermove", (event) => {
-        if (!mailDrag || event.pointerId !== mailDrag.pointerId) return;
+        function open() {
+          if (!isReady) return;
 
-        mailPanel.style.left = `${mailDrag.startLeft + (event.clientX - mailDrag.startX) / mailDrag.scaleX}px`;
-        mailPanel.style.top = `${mailDrag.startTop + (event.clientY - mailDrag.startY) / mailDrag.scaleY}px`;
-        keepMailOnScreen();
-      });
+          for (const otherPanel of desktopPanels) {
+            if (otherPanel.panel !== panel) otherPanel.hide();
+          }
 
-      function finishMailDrag(event) {
-        if (!mailDrag || event.pointerId !== mailDrag.pointerId) return;
+          panel.hidden = false;
+          button.setAttribute("aria-expanded", "true");
+          keepOnScreen();
+          panel.dispatchEvent(new Event("panelopen"));
+          closeButton.focus();
+        }
 
-        mailDrag = null;
+        button.addEventListener("click", open);
+        button.addEventListener("keydown", (event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            open();
+          }
+        });
+        closeButton.addEventListener("click", () => hide(true));
+        handle.addEventListener("pointerdown", (event) => {
+          if (event.button !== 0 || event.target.closest("button")) return;
+
+          const container = panel.offsetParent;
+          const containerRect = container.getBoundingClientRect();
+
+          drag = {
+            pointerId: event.pointerId,
+            startX: event.clientX,
+            startY: event.clientY,
+            startLeft: panel.offsetLeft,
+            startTop: panel.offsetTop,
+            scaleX: containerRect.width / container.offsetWidth,
+            scaleY: containerRect.height / container.offsetHeight,
+          };
+
+          handle.setPointerCapture(event.pointerId);
+          event.preventDefault();
+        });
+        handle.addEventListener("pointermove", (event) => {
+          if (!drag || event.pointerId !== drag.pointerId) return;
+
+          panel.style.left = `${drag.startLeft + (event.clientX - drag.startX) / drag.scaleX}px`;
+          panel.style.top = `${drag.startTop + (event.clientY - drag.startY) / drag.scaleY}px`;
+          keepOnScreen();
+        });
+
+        function finishDrag(event) {
+          if (!drag || event.pointerId !== drag.pointerId) return;
+
+          drag = null;
+        }
+
+        handle.addEventListener("pointerup", finishDrag);
+        handle.addEventListener("pointercancel", finishDrag);
+        handle.addEventListener("lostpointercapture", finishDrag);
+
+        desktopPanels.push({ button, panel, hide, keepOnScreen });
       }
 
-      mailPanelHandle.addEventListener("pointerup", finishMailDrag);
-      mailPanelHandle.addEventListener("pointercancel", finishMailDrag);
-      mailPanelHandle.addEventListener("lostpointercapture", finishMailDrag);
-      window.addEventListener("resize", keepMailOnScreen);
+      setupDesktopPanel("mail-button", "mail-panel", "mail-panel-close", "mail-panel-handle");
+      setupDesktopPanel("menu-button", "menu-panel", "menu-panel-close", "menu-panel-handle");
+
+      const menuPanel = byId("menu-panel");
+      const menuHome = byId("menu-home");
+      const ranksView = byId("ranks-view");
+      const ranksButton = byId("ranks-button");
+      const ranksBack = byId("ranks-back");
+
+      function showMenuHome(restoreFocus = false) {
+        ranksView.hidden = true;
+        menuHome.hidden = false;
+        ranksButton.setAttribute("aria-expanded", "false");
+
+        if (restoreFocus) ranksButton.focus();
+      }
+
+      ranksButton.addEventListener("click", () => {
+        menuHome.hidden = true;
+        ranksView.hidden = false;
+        ranksButton.setAttribute("aria-expanded", "true");
+        ranksBack.focus();
+      });
+      ranksBack.addEventListener("click", () => showMenuHome(true));
+      menuPanel.addEventListener("panelopen", () => showMenuHome());
+
+      window.addEventListener("resize", () => {
+        for (const panel of desktopPanels) panel.keepOnScreen();
+      });
       document.addEventListener("keydown", (event) => {
-        if (event.key === "Escape" && !mailPanel.hidden) {
-          closeMail();
+        if (event.key !== "Escape") return;
+
+        for (let index = desktopPanels.length - 1; index >= 0; index -= 1) {
+          if (!desktopPanels[index].panel.hidden) {
+            desktopPanels[index].hide(true);
+            break;
+          }
         }
       });
 
@@ -1117,8 +1291,7 @@
         isReady = false;
         bootAudio.currentTime = 0;
         document.body.dataset.ready = "false";
-        mailPanel.hidden = true;
-        mailButton.setAttribute("aria-expanded", "false");
+        for (const panel of desktopPanels) panel.hide();
 
         resetMusicSearch();
         seek(0);
