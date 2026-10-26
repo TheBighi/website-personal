@@ -1,4 +1,45 @@
-body{
-    background-color: #1a1918;
-    color: white;
+
+@font-face {
+    font-family: "Lovelt";
+    src: url("./Lovelt.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    background: #001477;
+    font-family: "Lovelt", sans-serif;
+    font-size: 100px;
+}
+
+body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9999;
+
+    background: radial-gradient(
+        ellipse at center,
+        transparent 25%,
+        rgba(0, 0, 35, 0.25) 55%,
+        rgba(0, 0, 15, 0.9) 100%
+    );
+}
+
+.main {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  color: #5297f1;
+
+    text-shadow:
+    0 0 5px #5297f1,
+    0 0 15px #2979ff,
+    0 0 30px #0055ff,
+    0 0 100px #003cff;
 }
